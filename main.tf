@@ -308,7 +308,7 @@ resource "azurerm_api_management_logger" "apim" {
 }
 
 resource "azurerm_api_management_diagnostic" "apim" {
-  identifier               = "apim-${local.unique_name}-diag"
+  identifier               = "applicationinsights"
   resource_group_name      = azurerm_resource_group.apim.name
   api_management_name      = azurerm_api_management.apim.name
   api_management_logger_id = azurerm_api_management_logger.apim.id
@@ -497,6 +497,10 @@ resource "azurerm_app_service" "web1" {
   location            = azurerm_resource_group.web1.location
   app_service_plan_id = azurerm_app_service_plan.web1.id
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   site_config {
     dotnet_framework_version = "v4.0"
   }
@@ -508,6 +512,22 @@ resource "azurerm_app_service" "web1" {
   }
 
   tags = var.tags
+}
+
+resource "azurerm_key_vault_access_policy" "web1" {
+  key_vault_id = azurerm_key_vault.apim.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_app_service.web1.identity.0.principal_id
+
+  certificate_permissions = [
+    "get",
+    "list",
+  ]
+
+  secret_permissions = [
+    "get",
+    "list",
+  ]
 }
 
 ##########################################################
@@ -546,6 +566,10 @@ resource "azurerm_app_service" "web2" {
     linux_fx_version          = "DOTNETCORE|3.1"
   }
 
+  identity {
+    type = "SystemAssigned"
+  }
+
   connection_string {
     name  = "DbContext"
     type  = "SQLAzure"
@@ -553,6 +577,22 @@ resource "azurerm_app_service" "web2" {
   }
 
   tags = var.tags
+}
+
+resource "azurerm_key_vault_access_policy" "web2" {
+  key_vault_id = azurerm_key_vault.apim.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_app_service.web1.identity.0.principal_id
+
+  certificate_permissions = [
+    "get",
+    "list",
+  ]
+
+  secret_permissions = [
+    "get",
+    "list",
+  ]
 }
 
 ##########################################################
@@ -573,14 +613,17 @@ resource "azurerm_storage_account" "func1" {
 }
 
 resource "azurerm_app_service_plan" "func1" {
-  name                = "as${local.unique_name}-func1plan"
-  resource_group_name = azurerm_resource_group.func1.name
-  location            = azurerm_resource_group.func1.location
-  kind                = "FunctionApp"
+  name                         = "as${local.unique_name}-func1plan"
+  resource_group_name          = azurerm_resource_group.func1.name
+  location                     = azurerm_resource_group.func1.location
+  kind                         = "elastic"
+  maximum_elastic_worker_count = 1
+  is_xenon                     = false
 
   sku {
-    tier = "ElasticPremium"
-    size = "EP1"
+    tier     = "ElasticPremium"
+    size     = "EP1"
+    capacity = 1
   }
 }
 
@@ -591,6 +634,26 @@ resource "azurerm_function_app" "func1" {
   app_service_plan_id        = azurerm_app_service_plan.func1.id
   storage_account_name       = azurerm_storage_account.func1.name
   storage_account_access_key = azurerm_storage_account.func1.primary_access_key
+
+  identity {
+    type = "SystemAssigned"
+  }
+}
+
+resource "azurerm_key_vault_access_policy" "func1" {
+  key_vault_id = azurerm_key_vault.apim.id
+  tenant_id    = data.azurerm_client_config.current.tenant_id
+  object_id    = azurerm_function_app.func1.identity.0.principal_id
+
+  certificate_permissions = [
+    "get",
+    "list",
+  ]
+
+  secret_permissions = [
+    "get",
+    "list",
+  ]
 }
 
 # create logic app
