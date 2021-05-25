@@ -12,10 +12,9 @@ data "http" "ifconfig" {
   url = "http://ifconfig.me"
 }
 
-resource "random_string" "apim" {
-  length    = 4
-  min_lower = 4
-  special   = false
+resource "random_pet" "apim" {
+  length    = 2
+  separator = ""
 }
 
 resource "random_password" "apim" {
@@ -26,17 +25,17 @@ resource "random_password" "apim" {
 }
 
 ##############################################
-# API Management
+# AZURE API MANAGEMENT
 ##############################################
 
 resource "azurerm_resource_group" "apim" {
-  name     = "rg-${var.project_name}-apim"
+  name     = "rg-${random_pet.apim.id}-apim"
   location = var.location
   tags     = var.tags
 }
 
 resource "azurerm_log_analytics_workspace" "apim" {
-  name                = "law-${local.unique_name}"
+  name                = "law-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
   location            = azurerm_resource_group.apim.location
   sku                 = "PerGB2018"
@@ -45,7 +44,7 @@ resource "azurerm_log_analytics_workspace" "apim" {
 }
 
 resource "azurerm_application_insights" "apim" {
-  name                = "ai-${local.unique_name}"
+  name                = "ai-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
   location            = azurerm_resource_group.apim.location
   application_type    = "web"
@@ -54,7 +53,7 @@ resource "azurerm_application_insights" "apim" {
 
 
 resource "azurerm_virtual_network" "apim" {
-  name                = "vn-${local.unique_name}"
+  name                = "vn-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
   location            = azurerm_resource_group.apim.location
   address_space       = var.vnet_address_space
@@ -76,7 +75,7 @@ resource "azurerm_subnet" "apim" {
 }
 
 resource "azurerm_network_security_group" "apim" {
-  name                = "nsg-${local.unique_name}"
+  name                = "nsg-${random_pet.apim.id}"
   location            = azurerm_resource_group.apim.location
   resource_group_name = azurerm_resource_group.apim.name
 
@@ -281,7 +280,7 @@ resource "azurerm_subnet_network_security_group_association" "apim" {
 }
 
 resource "azurerm_api_management" "apim" {
-  name                = "apim-${local.unique_name}"
+  name                = "apim-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
   location            = azurerm_resource_group.apim.location
   publisher_name      = var.apim_publishername
@@ -298,7 +297,7 @@ resource "azurerm_api_management" "apim" {
 }
 
 resource "azurerm_api_management_logger" "apim" {
-  name                = "apim-${local.unique_name}-logger"
+  name                = "apim-${random_pet.apim.id}-logger"
   resource_group_name = azurerm_resource_group.apim.name
   api_management_name = azurerm_api_management.apim.name
 
@@ -315,7 +314,7 @@ resource "azurerm_api_management_diagnostic" "apim" {
 }
 
 resource "azurerm_redis_cache" "apim" {
-  name                = "redis-${local.unique_name}"
+  name                = "redis-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
   location            = azurerm_resource_group.apim.location
   capacity            = 1
@@ -329,17 +328,17 @@ resource "azurerm_redis_cache" "apim" {
 }
 
 ##############################################
-# SQL Database
+# AZURE SQL DATABASE
 ##############################################
 
 resource "azurerm_resource_group" "sql" {
-  name     = "rg-${var.project_name}-sql"
+  name     = "rg-${random_pet.apim.id}-sql"
   location = var.location
   tags     = var.tags
 }
 
 resource "azurerm_sql_server" "sql" {
-  name                         = "sql${local.unique_name}"
+  name                         = "sql${replace(random_pet.apim.id, "-", "")}"
   resource_group_name          = azurerm_resource_group.sql.name
   location                     = azurerm_resource_group.sql.location
   version                      = "12.0"
@@ -375,11 +374,11 @@ resource "azurerm_sql_database" "sql" {
 }
 
 ##########################################################
-# Azure Key Vault
+# AZURE KEY VAULT
 ##########################################################
 
 resource "azurerm_key_vault" "apim" {
-  name                            = "kv-${local.unique_name}"
+  name                            = "kv-${random_pet.apim.id}"
   resource_group_name             = azurerm_resource_group.apim.name
   location                        = azurerm_resource_group.apim.location
   tags                            = var.tags
@@ -458,6 +457,10 @@ resource "azurerm_key_vault_access_policy" "me" {
     "setsas",
     "update"
   ]
+
+  depends_on = [
+    azurerm_key_vault.apim
+  ]
 }
 
 resource "azurerm_key_vault_secret" "conn" {
@@ -468,18 +471,18 @@ resource "azurerm_key_vault_secret" "conn" {
 }
 
 ##########################################################
-# Windows-based Web App
+# AZURE APP SERVICE - WINDOWS
 ##########################################################
 
 resource "azurerm_resource_group" "web1" {
-  name     = "rg-${var.project_name}-web1"
+  name     = "rg-${random_pet.apim.id}-web1"
   location = var.location
 
   tags = var.tags
 }
 
 resource "azurerm_app_service_plan" "web1" {
-  name                = "as${local.unique_name}-web1plan"
+  name                = "app-${random_pet.apim.id}-web1plan"
   resource_group_name = azurerm_resource_group.web1.name
   location            = azurerm_resource_group.web1.location
 
@@ -492,7 +495,7 @@ resource "azurerm_app_service_plan" "web1" {
 }
 
 resource "azurerm_app_service" "web1" {
-  name                = "as${local.unique_name}-web1wcf"
+  name                = "app-${random_pet.apim.id}-web1wcf"
   resource_group_name = azurerm_resource_group.web1.name
   location            = azurerm_resource_group.web1.location
   app_service_plan_id = azurerm_app_service_plan.web1.id
@@ -528,20 +531,25 @@ resource "azurerm_key_vault_access_policy" "web1" {
     "get",
     "list",
   ]
+
+  depends_on = [
+    azurerm_key_vault.apim,
+    azurerm_app_service.web1
+  ]
 }
 
 ##########################################################
-# Linux-based Web App
+# AZURE APP SERVICE - LINUX
 ##########################################################
 
 resource "azurerm_resource_group" "web2" {
-  name     = "rg-${var.project_name}-web2"
+  name     = "rg-${random_pet.apim.id}-web2"
   location = var.location
   tags     = var.tags
 }
 
 resource "azurerm_app_service_plan" "web2" {
-  name                = "as${local.unique_name}-web2plan"
+  name                = "app-${random_pet.apim.id}-web2plan"
   resource_group_name = azurerm_resource_group.web2.name
   location            = azurerm_resource_group.web2.location
   kind                = "Linux"
@@ -556,7 +564,7 @@ resource "azurerm_app_service_plan" "web2" {
 }
 
 resource "azurerm_app_service" "web2" {
-  name                = "as${local.unique_name}-web2rest"
+  name                = "app-${random_pet.apim.id}-web2rest"
   location            = azurerm_resource_group.web2.location
   resource_group_name = azurerm_resource_group.web2.name
   app_service_plan_id = azurerm_app_service_plan.web2.id
@@ -582,7 +590,7 @@ resource "azurerm_app_service" "web2" {
 resource "azurerm_key_vault_access_policy" "web2" {
   key_vault_id = azurerm_key_vault.apim.id
   tenant_id    = data.azurerm_client_config.current.tenant_id
-  object_id    = azurerm_app_service.web1.identity.0.principal_id
+  object_id    = azurerm_app_service.web2.identity.0.principal_id
 
   certificate_permissions = [
     "get",
@@ -593,19 +601,24 @@ resource "azurerm_key_vault_access_policy" "web2" {
     "get",
     "list",
   ]
+
+  depends_on = [
+    azurerm_key_vault.apim,
+    azurerm_app_service.web2
+  ]
 }
 
 ##########################################################
-# Function App
+# AZURE FUNCTION
 ##########################################################
 
 resource "azurerm_resource_group" "func1" {
-  name     = "rg-${var.project_name}-func1"
+  name     = "rg-${random_pet.apim.id}-func1"
   location = var.location
 }
 
 resource "azurerm_storage_account" "func1" {
-  name                     = "sa${local.unique_name}"
+  name                     = "sa${replace(random_pet.apim.id, "-", "")}"
   resource_group_name      = azurerm_resource_group.func1.name
   location                 = azurerm_resource_group.func1.location
   account_tier             = "Standard"
@@ -613,7 +626,7 @@ resource "azurerm_storage_account" "func1" {
 }
 
 resource "azurerm_app_service_plan" "func1" {
-  name                         = "as${local.unique_name}-func1plan"
+  name                         = "app-${random_pet.apim.id}-func1plan"
   resource_group_name          = azurerm_resource_group.func1.name
   location                     = azurerm_resource_group.func1.location
   kind                         = "elastic"
@@ -628,7 +641,7 @@ resource "azurerm_app_service_plan" "func1" {
 }
 
 resource "azurerm_function_app" "func1" {
-  name                       = "fn${local.unique_name}"
+  name                       = "app-${random_pet.apim.id}-func1"
   resource_group_name        = azurerm_resource_group.func1.name
   location                   = azurerm_resource_group.func1.location
   app_service_plan_id        = azurerm_app_service_plan.func1.id
@@ -654,9 +667,13 @@ resource "azurerm_key_vault_access_policy" "func1" {
     "get",
     "list",
   ]
+
+  depends_on = [
+    azurerm_key_vault.apim,
+    azurerm_function_app.func1
+  ]
 }
 
 # create logic app
 
-# crreate app gateway
-
+# create app gateway
