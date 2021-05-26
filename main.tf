@@ -64,14 +64,14 @@ resource "azurerm_subnet" "appgw" {
   name                 = "ApplicationGatewaySubnet"
   resource_group_name  = azurerm_resource_group.apim.name
   virtual_network_name = azurerm_virtual_network.apim.name
-  address_prefixes     = var.appgw_address_space
+  address_prefixes     = var.snet_agw_address_space
 }
 
 resource "azurerm_subnet" "apim" {
   name                 = "APIManagementSubnet"
   resource_group_name  = azurerm_resource_group.apim.name
   virtual_network_name = azurerm_virtual_network.apim.name
-  address_prefixes     = var.apim_address_space
+  address_prefixes     = var.snet_api_address_space
 }
 
 resource "azurerm_network_security_group" "apim" {
@@ -468,6 +468,10 @@ resource "azurerm_key_vault_secret" "conn" {
   value        = "Server=tcp:${azurerm_sql_server.sql.fully_qualified_domain_name},1433;Initial Catalog=ContosoUniversity;Persist Security Info=False;User ID=${var.username};Password=${random_password.apim.result};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   key_vault_id = azurerm_key_vault.apim.id
   tags         = var.tags
+
+  depends_on = [
+    azurerm_key_vault_access_policy.me
+  ]
 }
 
 ##########################################################

@@ -26,11 +26,11 @@ variable "vnet_address_space" {
   type = list(string)
 }
 
-variable "appgw_address_space" {
+variable "snet_agw_address_space" {
   type = list(string)
 }
 
-variable "apim_address_space" {
+variable "snet_api_address_space" {
   type = list(string)
 }
 
