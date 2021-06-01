@@ -355,13 +355,13 @@ resource "azurerm_sql_firewall_rule" "rule1" {
   end_ip_address      = "0.0.0.0"
 }
 
-resource "azurerm_sql_firewall_rule" "rule2" {
-  name                = "ClientIPAddress"
-  resource_group_name = azurerm_resource_group.sql.name
-  server_name         = azurerm_sql_server.sql.name
-  start_ip_address    = data.http.ifconfig.body
-  end_ip_address      = data.http.ifconfig.body
-}
+# resource "azurerm_sql_firewall_rule" "rule2" {
+#   name                = "ClientIPAddress"
+#   resource_group_name = azurerm_resource_group.sql.name
+#   server_name         = azurerm_sql_server.sql.name
+#   start_ip_address    = data.http.ifconfig.body
+#   end_ip_address      = data.http.ifconfig.body
+# }
 
 resource "azurerm_sql_database" "sql" {
   name                             = var.database_name
@@ -575,7 +575,22 @@ resource "azurerm_app_service" "web2" {
 
   app_settings = {
     WEBSITE_WEBDEPLOY_USE_SCM = true
-    linux_fx_version          = "DOTNETCORE|5.0" # az webapp list-runtimes --linux
+  }
+
+  site_config {
+    linux_fx_version = "DOTNETCORE|5.0" # az webapp list-runtimes --linux
+    default_documents = [
+      "Default.htm",
+      "Default.html",
+      "Default.asp",
+      "index.htm",
+      "index.html",
+      "iisstart.htm",
+      "default.aspx",
+      "index.php",
+      "hostingstart.html",
+    ]
+    use_32_bit_worker_process = true
   }
 
   identity {
