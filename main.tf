@@ -25,7 +25,7 @@ resource "random_password" "apim" {
 }
 
 ##############################################
-# AZURE API MANAGEMENT
+# AZURE RESOURCE GROUP
 ##############################################
 
 resource "azurerm_resource_group" "apim" {
@@ -33,6 +33,10 @@ resource "azurerm_resource_group" "apim" {
   location = var.location
   tags     = var.tags
 }
+
+##############################################
+# AZURE MONITOR
+##############################################
 
 resource "azurerm_log_analytics_workspace" "apim" {
   name                = "law-${random_pet.apim.id}"
@@ -51,6 +55,9 @@ resource "azurerm_application_insights" "apim" {
   tags                = var.tags
 }
 
+##############################################
+# AZURE VIRTUAL NETWORK
+##############################################
 
 resource "azurerm_virtual_network" "apim" {
   name                = "vn-${random_pet.apim.id}"
@@ -279,6 +286,10 @@ resource "azurerm_subnet_network_security_group_association" "apim" {
   network_security_group_id = azurerm_network_security_group.apim.id
 }
 
+##############################################
+# AZURE API MANAGEMENT
+##############################################
+
 resource "azurerm_api_management" "apim" {
   name                = "apim-${random_pet.apim.id}"
   resource_group_name = azurerm_resource_group.apim.name
@@ -312,6 +323,33 @@ resource "azurerm_api_management_diagnostic" "apim" {
   api_management_name      = azurerm_api_management.apim.name
   api_management_logger_id = azurerm_api_management_logger.apim.id
 }
+
+resource "azurerm_monitor_diagnostic_setting" "apim" {
+  name                       = "${azurerm_api_management.apim.name}-diagnostics"
+  target_resource_id         = azurerm_api_management.apim.id
+  log_analytics_workspace_id = azurerm_log_analytics_workspace.apim.id
+
+  log {
+    category = "GatewayLogs"
+    enabled  = true
+
+    retention_policy {
+      enabled = false
+    }
+  }
+
+  metric {
+    category = "AllMetrics"
+
+    retention_policy {
+      enabled = false
+    }
+  }
+}
+
+##############################################
+# AZURE REDIS CACHE
+##############################################
 
 resource "azurerm_redis_cache" "apim" {
   name                = "redis-${random_pet.apim.id}"
