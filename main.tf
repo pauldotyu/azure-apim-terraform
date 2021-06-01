@@ -574,8 +574,8 @@ resource "azurerm_app_service" "web2" {
   app_service_plan_id = azurerm_app_service_plan.web2.id
 
   app_settings = {
-    WEBSITE_WEBDEPLOY_USE_SCM = false
-    linux_fx_version          = "DOTNETCORE|3.1"
+    WEBSITE_WEBDEPLOY_USE_SCM = true
+    linux_fx_version          = "DOTNETCORE|5.0" # az webapp list-runtimes --linux
   }
 
   identity {
@@ -590,6 +590,8 @@ resource "azurerm_app_service" "web2" {
 
   tags = var.tags
 }
+
+# todo: adding main deployment slot
 
 resource "azurerm_key_vault_access_policy" "web2" {
   key_vault_id = azurerm_key_vault.apim.id
