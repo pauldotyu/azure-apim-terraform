@@ -325,23 +325,29 @@ resource "azurerm_api_management_diagnostic" "apim" {
 }
 
 resource "azurerm_monitor_diagnostic_setting" "apim" {
-  name                       = "${azurerm_api_management.apim.name}-diagnostics"
-  target_resource_id         = azurerm_api_management.apim.id
-  log_analytics_workspace_id = azurerm_log_analytics_workspace.apim.id
+  name                           = "${azurerm_api_management.apim.name}-diagnostics"
+  target_resource_id             = azurerm_api_management.apim.id
+  log_analytics_workspace_id     = azurerm_log_analytics_workspace.apim.id
+  log_analytics_destination_type = "Dedicated"
 
   log {
-    category = "GatewayLogs"
-    enabled  = true
+    log {
+      category = "GatewayLogs"
+      enabled  = true
 
-    retention_policy {
-      enabled = false
+      retention_policy {
+        days    = 0
+        enabled = false
+      }
     }
   }
 
   metric {
     category = "AllMetrics"
+    enabled  = true
 
     retention_policy {
+      days    = 0
       enabled = false
     }
   }
