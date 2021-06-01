@@ -606,12 +606,69 @@ resource "azurerm_app_service" "web2" {
   tags = var.tags
 }
 
-# todo: adding main deployment slot
+resource "azurerm_app_service_slot" "web2slot" {
+  name                = "main"
+  app_service_name    = azurerm_app_service.web2.name
+  location            = azurerm_resource_group.web2.location
+  resource_group_name = azurerm_resource_group.web2.name
+  app_service_plan_id = azurerm_app_service_plan.web2.id
+
+  app_settings = {
+    WEBSITE_WEBDEPLOY_USE_SCM = true
+  }
+
+  site_config {
+    linux_fx_version = "DOTNETCORE|5.0" # az webapp list-runtimes --linux
+    default_documents = [
+      "Default.htm",
+      "Default.html",
+      "Default.asp",
+      "index.htm",
+      "index.html",
+      "iisstart.htm",
+      "default.aspx",
+      "index.php",
+      "hostingstart.html",
+    ]
+    use_32_bit_worker_process = true
+  }
+
+  identity {
+    type = "SystemAssigned"
+  }
+
+  connection_string {
+    name  = "DbContext"
+    type  = "SQLAzure"
+    value = "@Microsoft.KeyVault(VaultName=${azurerm_key_vault.apim.name};SecretName=${azurerm_key_vault_secret.conn.name})"
+  }
+}
 
 resource "azurerm_key_vault_access_policy" "web2" {
   key_vault_id = azurerm_key_vault.apim.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
+  tenant_id    = azurerm_app_service.web2.identity.0.tenant_id
   object_id    = azurerm_app_service.web2.identity.0.principal_id
+
+  certificate_permissions = [
+    "get",
+    "list",
+  ]
+
+  secret_permissions = [
+    "get",
+    "list",
+  ]
+
+  depends_on = [
+    azurerm_key_vault.apim,
+    azurerm_app_service.web2
+  ]
+}
+
+resource "azurerm_key_vault_access_policy" "web2slot" {
+  key_vault_id = azurerm_key_vault.apim.id
+  tenant_id    = azurerm_app_service_slot.web2slot.identity[0].tenant_id
+  object_id    = azurerm_app_service_slot.web2slot.identity[0].principal_id
 
   certificate_permissions = [
     "get",
