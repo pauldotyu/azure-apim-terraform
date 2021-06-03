@@ -1,10 +1,11 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
 
-namespace Hello.Function
+namespace HelloFunction
 {
     public static class HelloImage
     {
@@ -24,7 +25,24 @@ namespace Hello.Function
             }
             else
             {
-                response.WriteString("Welcome to Azure Functions! You are getting " + req.Url);
+                string name = string.Empty;
+                try
+                {
+                    Hashtable qs = new();
+                    foreach (string q in req.Url.PathAndQuery.Split('?')[1].Split('&'))
+                    {
+                        string[] kv = q.Split('='); // element 0 is a key, element 1 is a value
+                        qs.Add(kv[0], kv[1]); 
+                    }
+
+                    name = qs["name"].ToString();
+                }
+                catch (System.Exception)
+                {
+                    name = "nothing";
+                }
+                
+                response.WriteString("Welcome to Azure Functions! You are getting " + name);
             }
             //https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.functions.worker.http.httprequestdata?view=azure-dotnet
             return response;
