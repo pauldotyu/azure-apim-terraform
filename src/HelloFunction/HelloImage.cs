@@ -24,7 +24,7 @@ namespace Hello.Function
             }
             else
             {
-                response.WriteString("Welcome to Azure Functions! You are getting " + req.Url.);
+                response.WriteString("Welcome to Azure Functions! You are getting " + req.Url);
             }
             //https://docs.microsoft.com/en-us/dotnet/api/microsoft.azure.functions.worker.http.httprequestdata?view=azure-dotnet
             return response;
