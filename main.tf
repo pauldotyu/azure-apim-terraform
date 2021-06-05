@@ -767,6 +767,7 @@ resource "azurerm_function_app" "func1" {
   app_service_plan_id        = azurerm_app_service_plan.func1.id
   storage_account_name       = azurerm_storage_account.func1.name
   storage_account_access_key = azurerm_storage_account.func1.primary_access_key
+  version                    = "~3"
 
   identity {
     type = "SystemAssigned"
