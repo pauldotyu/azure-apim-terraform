@@ -26,3 +26,4 @@ jobs:
         app-name: ${{ secrets.AZURE_FUNCTION_HELLO_WORLD }}
         # Path to package or folder. *.zip or a folder to deploy
         package: ${{ secrets.AZURE_FUNCTION_HELLO_WORLD_PUBLISH_PROFILE }}
+        working-directory: src/HelloFunction
