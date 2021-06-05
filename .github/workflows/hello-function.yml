@@ -1,1 +1,28 @@
+name: 'HelloFunction'
 
+on:
+  # Triggers the workflow on push or pull request events but only for the main branch
+  push:
+    branches: 
+    - main/src/HelloFunction
+  pull_request:
+    branches:
+    - main/src/HelloFunction
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  function:
+    name: 'HelloFunction'
+    runs-on: ubuntu-latest
+    environment: development
+    
+    steps:
+    - name: Azure Functions Action
+      uses: Azure/functions-action@v1.4.0
+      with:
+        # Name of the Azure Function App
+        app-name: ${{ secrets.AZURE_FUNCTION_HELLO_WORLD }}
+        # Path to package or folder. *.zip or a folder to deploy
+        package: ${{ secrets.AZURE_FUNCTION_HELLO_WORLD_PUBLISH_PROFILE }}
