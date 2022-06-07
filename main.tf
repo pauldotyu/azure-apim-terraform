@@ -438,66 +438,66 @@ resource "azurerm_key_vault_access_policy" "me" {
   object_id    = data.azurerm_client_config.current.object_id
 
   certificate_permissions = [
-    "backup",
-    "create",
-    "delete",
-    "deleteissuers",
-    "get",
-    "getissuers",
-    "import",
-    "list",
-    "listissuers",
-    "managecontacts",
-    "manageissuers",
-    "purge",
-    "recover",
-    "restore",
-    "setissuers",
-    "update"
+    "Backup",
+    "Create",
+    "Delete",
+    "DeleteIssuers",
+    "Get",
+    "GetIssuers",
+    "Import",
+    "List",
+    "ListIssuers",
+    "ManageContacts",
+    "ManageIssuers",
+    "Purge",
+    "Recover",
+    "Restore",
+    "SetIssuers",
+    "Update"
   ]
   key_permissions = [
-    "backup",
-    "create",
-    "decrypt",
-    "delete",
-    "encrypt",
-    "get",
-    "import",
-    "list",
-    "purge",
-    "recover",
-    "restore",
-    "sign",
-    "unwrapKey",
-    "update",
-    "verify",
-    "wrapKey"
+    "Backup",
+    "Create",
+    "Decrypt",
+    "Delete",
+    "Encrypt",
+    "Get",
+    "Import",
+    "List",
+    "Purge",
+    "Recover",
+    "Restore",
+    "Sign",
+    "UnwrapKey",
+    "Update",
+    "Verify",
+    "WrapKey"
   ]
   secret_permissions = [
-    "backup",
-    "delete",
-    "get",
-    "list",
-    "purge",
-    "recover",
-    "restore",
-    "set"
+    "Backup",
+    "Delete",
+    "Get",
+    "List",
+    "Purge",
+    "Recover",
+    "Restore",
+    "Set"
   ]
   storage_permissions = [
-    "backup",
-    "delete",
-    "deletesas",
-    "get",
-    "getsas",
-    "list",
-    "listsas",
-    "purge",
-    "recover",
-    "regeneratekey",
-    "restore",
-    "set",
-    "setsas",
-    "update"
+    "Backup",
+    "Delete",
+    "DeleteSAS",
+    "Get",
+    "GetSAS",
+    "List",
+    "ListSAS",
+    "Purge",
+    "Recover",
+    "RegenerateKey",
+    "Restore",
+    "Set",
+    "SetSAS",
+    "Update"
   ]
 
   depends_on = [
@@ -569,13 +569,13 @@ resource "azurerm_key_vault_access_policy" "web1" {
   object_id    = azurerm_app_service.web1.identity.0.principal_id
 
   certificate_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   secret_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   depends_on = [
@@ -692,13 +692,13 @@ resource "azurerm_key_vault_access_policy" "web2" {
   object_id    = azurerm_app_service.web2.identity.0.principal_id
 
   certificate_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   secret_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   depends_on = [
@@ -713,13 +713,13 @@ resource "azurerm_key_vault_access_policy" "web2slot" {
   object_id    = azurerm_app_service_slot.web2slot.identity[0].principal_id
 
   certificate_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   secret_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   depends_on = [
@@ -780,13 +780,13 @@ resource "azurerm_key_vault_access_policy" "func1" {
   object_id    = azurerm_function_app.func1.identity.0.principal_id
 
   certificate_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   secret_permissions = [
-    "get",
-    "list",
+    "Get",
+    "List",
   ]
 
   depends_on = [
